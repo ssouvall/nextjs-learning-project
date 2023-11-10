@@ -5,6 +5,7 @@ import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
+const bcrypt = require('bcrypt');
  
 const InvoiceSchema = z.object({
     id: z.string(),
@@ -20,7 +21,23 @@ const InvoiceSchema = z.object({
     date: z.string(),
 });
 
-export type State = {
+const UserSchema = z.object({
+  id: z.string(),
+  name: z.string({
+    invalid_type_error: 'Please enter your name.',
+  }),
+  email: z.string({
+    invalid_type_error: 'Please enter your email.',
+  }).email('Please enter a valid email address'),
+  password: z.string({
+    invalid_type_error: 'Please choose a password.',
+  }),
+  confirm_password: z.string({
+    invalid_type_error: 'Please choose a password.',
+  })
+})
+
+export type InvoiceState = {
     errors?: {
         customerId?: string[];
         amount?: string[];
@@ -28,11 +45,26 @@ export type State = {
     };
     message?: string | null;
 };
+
+export type UserState = {
+  errors?: {
+      name?: string[];
+      email?: string[];
+      password?: string[];
+      confirm_password?: string[];
+  };
+  message?: string | null;
+  isSuccess: boolean
+};
  
 const CreateInvoice = InvoiceSchema.omit({ id: true, date: true });
 const UpdateInvoice = InvoiceSchema.omit({ date: true, id: true });
+const CreateUser = UserSchema.omit({ id: true }).refine((data) => data.password === data.confirm_password, {
+  message: "Password doesn't match",
+  path: ["confirmpassword"]
+});
 
-export async function createInvoice(prevState: State, formData: FormData) {
+export async function createInvoice(prevState: InvoiceState, formData: FormData) {
     const validatedFields = CreateInvoice.safeParse({
       customerId: formData.get('customerId'),
       amount: formData.get('amount'),
@@ -95,6 +127,43 @@ export async function createInvoice(prevState: State, formData: FormData) {
     } catch (error) {
       return { message: 'Database Error: Failed to Delete Invoice.' };
     }
+  }
+
+  export async function createUser(prevState: UserState, formData: FormData) {
+    const validatedFields = CreateUser.safeParse({
+      name: formData.get('name'),
+      email: formData.get('email'),
+      password: formData.get('password'),
+      confirm_password: formData.get('confirm_password')
+    });
+
+    if (!validatedFields.success) {
+      return {
+        errors: validatedFields.error.flatten().fieldErrors,
+        message: 'Missing Fields. Failed to Create User.',
+        isSuccess: false
+      };
+    }
+
+    const { name, email, password } = validatedFields.data;
+    const hashedPassword = await bcrypt.hash(password, 10);
+   
+    try {
+      await sql`
+        INSERT INTO users (name, email, password)
+        VALUES (${name}, ${email}, ${hashedPassword})
+      `;
+      return {
+        isSuccess: true
+      };
+    } catch (error) {
+      return {
+        message: 'Database Error: Failed to Create User.',
+        isSuccess: false
+      };
+    }
+   
+    redirect('/');
   }
 
   export async function authenticate(
