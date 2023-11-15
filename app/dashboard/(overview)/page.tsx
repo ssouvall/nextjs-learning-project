@@ -22,9 +22,6 @@ export default async function Page() {
   console.log(session);
   return (
     <main>
-      <h1 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
-        Dashboard
-      </h1>
       <LoggedInUser name={session?.user?.name || ""} />
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <Suspense fallback={<CardsSkeleton />}>
