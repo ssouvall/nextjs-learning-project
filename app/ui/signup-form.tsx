@@ -5,11 +5,15 @@ import {
   AtSymbolIcon,
   KeyIcon,
   ExclamationCircleIcon,
+  ArrowLeftIcon,
+  HomeIcon,
+  ArrowRightOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 import { ArrowRightIcon } from "@heroicons/react/20/solid";
 import { Button } from "./button";
 import { useFormState, useFormStatus } from "react-dom";
 import { createUser } from "@/app/lib/actions";
+import Link from "next/link";
 
 export default function SignUpForm() {
   const initialState = { message: null, errors: {}, isSuccess: false };
@@ -17,7 +21,27 @@ export default function SignUpForm() {
   const { pending } = useFormStatus();
 
   if (state.isSuccess) {
-    return <p>You did it!</p>;
+    return (
+      <div className="flex-1 flow-root rounded-lg bg-gray-50 px-6 pb-4 pt-8">
+        <h1 className={`${lusitana.className}mb-3 text-2xl pb-20`}>
+          User Created Successfully!
+        </h1>
+        <Link
+          href="/"
+          className="flex h-10 float-left items-center mr-2 gap-5 self-start rounded-lg bg-green-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-green-400 md:text-base"
+        >
+          <span>Home</span>
+          <HomeIcon className="w-5 md:w-6" />
+        </Link>{" "}
+        <Link
+          href="/login"
+          className="flex h-10 items-center float-left gap-5 self-start rounded-lg bg-blue-500 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-400 md:text-base"
+        >
+          <span>Log In</span>
+          <ArrowRightOnRectangleIcon className="w-5 md:w-6" />
+        </Link>
+      </div>
+    );
   } else {
     return (
       <form action={dispatch} className="space-y-3">
@@ -107,13 +131,13 @@ export default function SignUpForm() {
           <SignUpButton />
           <div className="flex h-8 items-end space-x-1">
             {/* {code === "CredentialSignin" && (
-            <>
-              <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
-              <p aria-live="polite" className="text-sm text-red-500">
-                Invalid credentials
-              </p>
-            </>
-          )} */}
+              <>
+                <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
+                <p aria-live="polite" className="text-sm text-red-500">
+                  Invalid credentials
+                </p>
+              </>
+            )} */}
           </div>
         </div>
       </form>
@@ -125,7 +149,7 @@ function SignUpButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button className="mt-4 w-full" aria-disabled={pending}>
+    <Button className="mt-6 w-full" aria-disabled={pending}>
       Sign Up <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
     </Button>
   );

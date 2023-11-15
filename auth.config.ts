@@ -17,5 +17,8 @@ export const authConfig = {
       }
       return true;
     },
+      async session({ session, token, user }) {
+        return session
+      }
   },
 } satisfies NextAuthConfig;

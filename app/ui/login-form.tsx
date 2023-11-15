@@ -10,6 +10,7 @@ import { ArrowRightIcon } from "@heroicons/react/20/solid";
 import { Button } from "./button";
 import { useFormState, useFormStatus } from "react-dom";
 import { authenticate } from "@/app/lib/actions";
+import Link from "next/link";
 
 export default function LoginForm() {
   const [code, action] = useFormState(authenticate, undefined);
@@ -62,6 +63,9 @@ export default function LoginForm() {
           </div>
         </div>
         <LoginButton />
+        <div className="p-4 text-center text-blue-500 underline">
+          <Link href="/sign-up">Click Here to Create an Account!</Link>
+        </div>
         <div className="flex h-8 items-end space-x-1">
           {code === "CredentialSignin" && (
             <>
@@ -81,7 +85,7 @@ function LoginButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button className="mt-4 w-full" aria-disabled={pending}>
+    <Button className="mt-6 w-full" aria-disabled={pending}>
       Log in <ArrowRightIcon className="ml-auto h-5 w-5 text-gray-50" />
     </Button>
   );
