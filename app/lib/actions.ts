@@ -21,6 +21,17 @@ const InvoiceSchema = z.object({
     date: z.string(),
 });
 
+const CustomerSchema = z.object({
+  id: z.string(),
+  name: z.string({
+    invalid_type_error: 'Please enter a name.',
+  }),
+  email: z.string({
+    invalid_type_error: 'Please enter an email address.',
+  }).email('Please enter a valid email address'),
+  image_url: z.string()
+});
+
 const UserSchema = z.object({
   id: z.string(),
   name: z.string({
@@ -46,6 +57,15 @@ export type InvoiceState = {
     message?: string | null;
 };
 
+export type CustomerState = {
+  errors?: {
+      name?: string[];
+      email?: string[];
+      image_url?: string[];
+  };
+  message?: string | null;
+};
+
 export type UserState = {
   errors?: {
       name?: string[];
@@ -63,6 +83,7 @@ const CreateUser = UserSchema.omit({ id: true }).refine((data) => data.password 
   message: "Password doesn't match",
   path: ["confirmpassword"]
 });
+const CreateCustomer = CustomerSchema.omit({ id: true });
 
 export async function createInvoice(prevState: InvoiceState, formData: FormData) {
     const validatedFields = CreateInvoice.safeParse({
@@ -126,6 +147,46 @@ export async function createInvoice(prevState: InvoiceState, formData: FormData)
       return { message: 'Deleted Invoice.' };
     } catch (error) {
       return { message: 'Database Error: Failed to Delete Invoice.' };
+    }
+  }
+
+  export async function createCustomer(prevState: CustomerState, formData: FormData) {
+    const validatedFields = CreateCustomer.safeParse({
+      name: formData.get('name'),
+      email: formData.get('email'),
+      image_url: '/customers/evil-rabbit.png',
+    });
+   
+    if (!validatedFields.success) {
+        return {
+          errors: validatedFields.error.flatten().fieldErrors,
+          message: 'Missing Fields. Failed to Create Customer.',
+        };
+    }
+    const { name, email, image_url } = validatedFields.data;
+   
+    try {
+      await sql`
+        INSERT INTO customers (name, email, image_url)
+        VALUES (${name}, ${email}, ${image_url})
+      `;
+    } catch (error) {
+      return {
+        message: 'Database Error: Failed to Create Customer.',
+      };
+    }
+   
+    revalidatePath('/dashboard/customers');
+    redirect('/dashboard/customers');
+  }
+
+  export async function deleteCustomer(id: string) {
+    try {
+      await sql`DELETE FROM customers WHERE id = ${id}`;
+      revalidatePath('/dashboard/customers');
+      return { message: 'Deleted Customer.' };
+    } catch (error) {
+      return { message: 'Database Error: Failed to Delete Customer.' };
     }
   }
 
