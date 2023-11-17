@@ -1,7 +1,7 @@
 import { fetchCustomerPages } from "@/app/lib/data";
 import Table from "@/app/ui/customers/table";
 import { lusitana } from "@/app/ui/fonts";
-import { CreateCustomer } from "@/app/ui/invoices/buttons";
+import { CreateCustomer } from "@/app/ui/customers/buttons";
 import Pagination from "@/app/ui/pagination";
 // import Pagination from "@/app/ui/pagination";
 import Search from "@/app/ui/search";

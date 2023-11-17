@@ -7,6 +7,7 @@ import {
   LatestInvoiceRaw,
   User,
   Revenue,
+  Customer,
 } from './definitions';
 import { formatCurrency } from './utils';
 import { unstable_noStore as noStore } from 'next/cache';
@@ -177,6 +178,29 @@ export async function fetchInvoiceById(id: string) {
     }));
 
     return invoice[0];
+  } catch (error) {
+    console.error('Database Error:', error);
+  }
+}
+
+export async function fetchCustomerById(id: string) {
+  noStore();
+  try {
+    const data = await sql<Customer>`
+      SELECT
+        customers.id,
+        customers.name,
+        customers.email,
+        customers.image_url
+      FROM customers
+      WHERE customers.id = ${id};
+    `;
+
+    const customer = data.rows.map((customer) => ({
+      ...customer,
+    }));
+
+    return customer[0];
   } catch (error) {
     console.error('Database Error:', error);
   }

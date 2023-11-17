@@ -84,6 +84,7 @@ const CreateUser = UserSchema.omit({ id: true }).refine((data) => data.password 
   path: ["confirmpassword"]
 });
 const CreateCustomer = CustomerSchema.omit({ id: true });
+const UpdateCustomer = CustomerSchema.omit({ id: true });
 
 export async function createInvoice(prevState: InvoiceState, formData: FormData) {
     const validatedFields = CreateInvoice.safeParse({
@@ -174,6 +175,27 @@ export async function createInvoice(prevState: InvoiceState, formData: FormData)
       return {
         message: 'Database Error: Failed to Create Customer.',
       };
+    }
+   
+    revalidatePath('/dashboard/customers');
+    redirect('/dashboard/customers');
+  }
+
+  export async function updateCustomer(id: string, formData: FormData) {
+    const { name, email, image_url } = UpdateCustomer.parse({
+      name: formData.get('name'),
+      email: formData.get('email'),
+      image_url: '/customers/amy-burns.png',
+    });
+      
+    try {
+      await sql`
+          UPDATE customers
+          SET name = ${name}, email = ${email}, image_url = ${image_url}
+          WHERE id = ${id}
+        `;
+    } catch (error) {
+      return { message: 'Database Error: Failed to Update Customer.' };
     }
    
     revalidatePath('/dashboard/customers');

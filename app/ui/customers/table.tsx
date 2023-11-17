@@ -3,6 +3,7 @@ import { lusitana } from "@/app/ui/fonts";
 import Search from "@/app/ui/search";
 import { CustomersTable, FormattedCustomersTable } from "@/app/lib/definitions";
 import { fetchCustomers, fetchFilteredCustomers } from "@/app/lib/data";
+import { DeleteCustomer, UpdateCustomer } from "./buttons";
 
 export default async function CustomersTable({
   query,
@@ -106,6 +107,12 @@ export default async function CustomersTable({
                       </td>
                       <td className="whitespace-nowrap bg-white px-4 py-5 text-sm group-first-of-type:rounded-md group-last-of-type:rounded-md">
                         {customer.total_paid}
+                      </td>
+                      <td className="whitespace-nowrap bg-white py-3 pl-6 pr-3">
+                        <div className="flex justify-end gap-3">
+                          <UpdateCustomer id={customer.id} />
+                          <DeleteCustomer id={customer.id} />
+                        </div>
                       </td>
                     </tr>
                   ))}
